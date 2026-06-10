@@ -34,6 +34,25 @@ app = FastAPI(
 )
 
 
+@app.get("/")
+def root() -> dict:
+    model_bundle = load_model()
+    return {
+        "project": "Real-Time Payment Fraud Detection System",
+        "status": "online",
+        "focus": [
+            "transaction analysis",
+            "suspicious payment detection",
+            "risk scoring",
+            "analyst workflow support",
+        ],
+        "docs": "/docs",
+        "sample_transactions": "/transactions/sample",
+        "model_version": model_bundle.model_version,
+        "roc_auc": model_bundle.roc_auc,
+    }
+
+
 @app.get("/health")
 def health() -> dict:
     model_bundle = load_model()

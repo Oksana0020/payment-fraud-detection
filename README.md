@@ -2,6 +2,7 @@
 
 A Python fraud detection project focused on suspicious payment detection, transaction risk scoring, and analyst workflows for fraud prevention and financial risk management.
 
+
 ## Stack
 
 - Python
@@ -17,6 +18,14 @@ A Python fraud detection project focused on suspicious payment detection, transa
 - Expose API endpoints for health, metrics, prediction, batch analysis, and retraining
 - Provide an analyst dashboard for reviewing flagged payments
 - Generate a sample transaction dataset for local demos and experimentation
+
+## Demo flow
+
+1. Train the model on the generated sample transaction data.
+2. Run the FastAPI service to expose scoring endpoints.
+3. Launch the Streamlit dashboard to inspect flagged payments.
+4. Upload a batch of transactions or simulate a suspicious payment scenario.
+5. Review analyst-facing recommendations and risk signals.
 
 ## Project structure
 
@@ -43,11 +52,28 @@ uvicorn app.main:app --reload
 
 API docs will be available at `http://127.0.0.1:8000/docs`.
 
+### Key API routes
+
+- `GET /` project summary and service status
+- `GET /health` health check with model metadata
+- `GET /metrics` model evaluation summary
+- `GET /transactions/sample` sample scored transactions for demos
+- `POST /predict` score a single transaction
+- `POST /analyze` score a batch of transactions
+- `POST /train` retrain and persist the model artifact
+
 ## Run the dashboard
 
 ```powershell
 streamlit run dashboard/streamlit_app.py
 ```
+
+The dashboard includes:
+
+- A triage queue for flagged payments
+- Visual breakdowns of risk distribution and merchant category exposure
+- A scenario lab for manual payment simulation
+- CSV upload support for batch analyst review
 
 ## Sample prediction payload
 
@@ -71,6 +97,3 @@ streamlit run dashboard/streamlit_app.py
 }
 ```
 
-## CV title
-
-Real-Time Payment Fraud Detection System
