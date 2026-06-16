@@ -3,17 +3,13 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 from app.data import ensure_dataset
-from app.model import FEATURES, load_model, prepare_frame, score_transactions
-
-
-def classify_risk_band(score: int) -> str:
-    if score >= 85:
-        return "Critical"
-    if score >= 72:
-        return "High"
-    if score >= 45:
-        return "Medium"
-    return "Low"
+from app.model import (
+    FEATURES,
+    classify_risk_band,
+    load_model,
+    prepare_frame,
+    score_transactions,
+)
 
 
 def infer_alert_reasons(row: pd.Series) -> str:
@@ -71,14 +67,27 @@ st.markdown(
     <style>
     .stApp {
         background:
-            radial-gradient(circle at top left, rgba(15, 118, 110, 0.10), transparent 28%),
-            radial-gradient(circle at top right, rgba(245, 158, 11, 0.12), transparent 24%),
+            radial-gradient(
+                circle at top left,
+                rgba(15, 118, 110, 0.10),
+                transparent 28%
+            ),
+            radial-gradient(
+                circle at top right,
+                rgba(245, 158, 11, 0.12),
+                transparent 24%
+            ),
             linear-gradient(180deg, #f6fbfb 0%, #ffffff 42%, #f4f7f8 100%);
     }
     .hero-card {
         padding: 1.4rem 1.6rem;
         border-radius: 22px;
-        background: linear-gradient(135deg, #0f172a 0%, #123b4a 52%, #0f766e 100%);
+        background: linear-gradient(
+            135deg,
+            #0f172a 0%,
+            #123b4a 52%,
+            #0f766e 100%
+        );
         color: #f8fafc;
         box-shadow: 0 24px 48px rgba(15, 23, 42, 0.18);
         margin-bottom: 1rem;
@@ -131,6 +140,7 @@ st.markdown(
 
 view = load_dashboard_view()
 model_bundle = load_model()
+flagged_rate = (view["is_suspicious"].mean() * 100)
 
 st.sidebar.header("Screening Controls")
 threshold = st.sidebar.slider(
@@ -174,6 +184,22 @@ second_row[1].metric(
     f"{(view['is_international'].mean() * 100):.0f}%",
 )
 second_row[2].metric("Model ROC AUC", f"{model_bundle.roc_auc:.2f}")
+
+third_row = st.columns(3)
+third_row[0].metric("Flag Rate", f"{flagged_rate:.0f}%")
+third_row[1].metric(
+    "Top Risk Category",
+    (
+        view.groupby("merchant_category")["risk_score"]
+        .mean()
+        .sort_values(ascending=False)
+        .index[0]
+    ),
+)
+third_row[2].metric(
+    "Median Payment",
+    f"${view['amount'].median():,.0f}",
+)
 
 st.markdown(
     """
@@ -293,6 +319,13 @@ with queue_tab:
         hide_index=True,
     )
 
+    st.download_button(
+        "Download current queue",
+        data=queue_view.to_csv(index=False).encode("utf-8"),
+        file_name="analyst_queue.csv",
+        mime="text/csv",
+    )
+
     if queue_view.empty:
         st.warning("No transactions match the current queue filters.")
     else:
@@ -348,6 +381,7 @@ with queue_tab:
                 f"{selected_row['fraud_probability']:.2%}",
             )
             st.metric("Risk score", int(selected_row["risk_score"]))
+            st.metric("Risk band", selected_row["risk_band"])
             st.metric(
                 "Known label",
                 "Fraud" if selected_row["is_fraud"] else "Legitimate",

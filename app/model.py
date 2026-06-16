@@ -37,6 +37,16 @@ FEATURES = NUMERIC_FEATURES + BOOLEAN_FEATURES + CATEGORICAL_FEATURES
 MODEL_VERSION = "2026.06.05"
 
 
+def classify_risk_band(score: int) -> str:
+    if score >= 85:
+        return "Critical"
+    if score >= 72:
+        return "High"
+    if score >= 45:
+        return "Medium"
+    return "Low"
+
+
 @dataclass
 class ModelBundle:
     pipeline: Pipeline
@@ -134,6 +144,7 @@ def score_transactions(frame: pd.DataFrame) -> pd.DataFrame:
     results = frame.copy()
     results["fraud_probability"] = probabilities.round(4)
     results["risk_score"] = scores
+    results["risk_band"] = results["risk_score"].apply(classify_risk_band)
     results["is_suspicious"] = probabilities >= RISK_THRESHOLD
     results["recommended_action"] = results["is_suspicious"].map(
         {

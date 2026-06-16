@@ -26,6 +26,7 @@ class PredictionResponse(BaseModel):
     fraud_probability: float
     risk_score: int
     is_suspicious: bool
+    risk_band: str
     recommended_action: str
     model_version: str
     explanation: Optional[str] = None

@@ -40,6 +40,7 @@ def root() -> dict:
     return {
         "project": "Real-Time Payment Fraud Detection System",
         "status": "online",
+        "version": "1.0.0",
         "focus": [
             "transaction analysis",
             "suspicious payment detection",
@@ -93,6 +94,7 @@ def predict(transaction: TransactionRequest) -> PredictionResponse:
         fraud_probability=float(result["fraud_probability"]),
         risk_score=int(result["risk_score"]),
         is_suspicious=bool(result["is_suspicious"]),
+        risk_band=str(result["risk_band"]),
         recommended_action=str(result["recommended_action"]),
         model_version=str(result["model_version"]),
         explanation=explanation,
